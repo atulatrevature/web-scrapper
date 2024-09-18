@@ -101,9 +101,9 @@ export default function ScraperPage() {
           <table className="min-w-full bg-white rounded shadow">
             <thead>
               <tr className="bg-gray-800 text-white">
-                <th className="py-2 px-4">Name</th>
-                <th className="py-2 px-4">Job Title</th>
-                <th className="py-2 px-4">Email Address</th>
+                <th className="py-2 px-4 text-left">Name</th>
+                <th className="py-2 px-4 text-left">Job Title</th>
+                <th className="py-2 px-4 text-left">Email Address</th>
               </tr>
             </thead>
             <tbody>

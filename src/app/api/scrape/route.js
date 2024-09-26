@@ -33,7 +33,7 @@ export async function POST(request) {
     await page.goto(url, { waitUntil: 'networkidle2' });
     console.log(schools[domainName])
     // Add a delay to wait for the JavaScript-rendered content
-    await page.waitForSelector(`table,  ${schools[domainName]}`, { timeout: 5000 }); // Adjust the selector if needed
+    await page.waitForSelector(`table,  ${schools[domainName]}`, { timeout: 15000 }); // Adjust the selector if needed
 
     const staffData = await page.evaluate((schools, domainName) => {
       let staffData = [];
@@ -70,69 +70,66 @@ export async function POST(request) {
         }
         return null;
       };
-
-      if (schools[domainName]) {
-        // First, attempt to extract data using the mapped domain selectors
-        document.querySelectorAll(schools[domainName]).forEach((element) => {
-          const name = findFirstMatch(element, nameClasses);
-          let jobTitle = findFirstMatch(element, jobTitleClasses);
-          let email = null;
-          const emailLink = element.querySelector('a[href^="mailto:"]');
-          if (emailLink) {
-            email = extractCleanEmail(emailLink.href.replace('mailto:', '').trim());
-          }else{
-               // Find email from the element's text content
-              const emailPattern = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
-              const elementText = element.textContent.trim();
-              // Check if the text content contains a valid email pattern
-              const foundEmail = elementText.match(emailPattern);
-              if (foundEmail) {
-                email = foundEmail[0].trim();
+ 
+        const elements = document.querySelectorAll(schools[domainName]); 
+        if (elements.length === 0) {
+          document.querySelectorAll('table tbody tr').forEach((row) => {
+            const cells = row.querySelectorAll('td');
+  
+            if (cells.length > 0) {
+              const name = cells[0]?.innerText.trim();  // Name is always in the first cell
+              let email = null;
+              let jobTitle = null;
+  
+              // Job title could be in the second or third cell
+              if (cells[1]?.innerText && !cells[1].innerText.includes('@')) {
+                jobTitle = cells[1]?.innerText.trim();
+              } else if (cells[2]?.innerText && !cells[2].innerText.includes('@')) {
+                jobTitle = cells[2]?.innerText.trim();
               }
-          }
-
-          // Validate the job title
-          jobTitle = isValidJobTitle(jobTitle) ? jobTitle : null;
-
-          if (name) {
-            staffData.push({ name, jobTitle, email });
-          }
-        });
-      } else {
-        // For sites with a table-based structure
-        document.querySelectorAll('table tbody tr').forEach((row) => {
-          const cells = row.querySelectorAll('td');
-
-          if (cells.length > 0) {
-            const name = cells[0]?.innerText.trim();  // Name is always in the first cell
+  
+              // Validate the job title
+              jobTitle = isValidJobTitle(jobTitle) ? jobTitle : null;
+  
+              // Find email in any cell dynamically
+              cells.forEach((cell) => {
+                const cellText = cell.innerText.trim();
+                const extractedEmail = extractCleanEmail(cellText);
+                if (extractedEmail) {
+                  email = extractedEmail;
+                }
+              });
+  
+              if (name || email) {
+                staffData.push({ name, jobTitle, email });
+              }
+            }
+          });
+        }
+        
+        elements.forEach((element) => {
+            const name = findFirstMatch(element, nameClasses);
+            let jobTitle = findFirstMatch(element, jobTitleClasses);
             let email = null;
-            let jobTitle = null;
-
-            // Job title could be in the second or third cell
-            if (cells[1]?.innerText && !cells[1].innerText.includes('@')) {
-              jobTitle = cells[1]?.innerText.trim();
-            } else if (cells[2]?.innerText && !cells[2].innerText.includes('@')) {
-              jobTitle = cells[2]?.innerText.trim();
+        
+            const emailLink = element.querySelector('a[href^="mailto:"]');
+            if (emailLink) {
+                email = extractCleanEmail(emailLink.href.replace('mailto:', '').trim());
+            } else {
+                const emailPattern = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+                const elementText = element.textContent.trim();
+                const foundEmail = elementText.match(emailPattern);
+                if (foundEmail) {
+                    email = foundEmail[0].trim();
+                }
             }
-
-            // Validate the job title
+        
             jobTitle = isValidJobTitle(jobTitle) ? jobTitle : null;
-
-            // Find email in any cell dynamically
-            cells.forEach((cell) => {
-              const cellText = cell.innerText.trim();
-              const extractedEmail = extractCleanEmail(cellText);
-              if (extractedEmail) {
-                email = extractedEmail;
-              }
-            });
-
-            if (name || email) {
-              staffData.push({ name, jobTitle, email });
+        
+            if (name) {
+                staffData.push({ name, jobTitle, email });
             }
-          }
-        });
-      }
+        }); 
 
       return staffData;
     }, schools, domainName);

@@ -5,9 +5,10 @@ import * as XLSX from 'xlsx'; // Importing the xlsx library for Excel download
 
 export default function ScraperPage() {
   const [url, setUrl] = useState('');
-  const [data, setData] = useState(null);
+  const [data, setData] = useState([]); // Initialize data as an empty array
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search input
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,8 +26,12 @@ export default function ScraperPage() {
 
       const result = await response.json();
       if (response.ok) {
-        console.log(result)
-        setData(result);
+        const updatedData = result.map((item) => ({
+          ...item,
+          url, // Add the scraped URL to each item
+        }));
+        // Append new scraped data to the existing data
+        setData((prevData) => [...prevData, ...updatedData]);
       } else {
         setError(result.message);
       }
@@ -44,12 +49,13 @@ export default function ScraperPage() {
       return;
     }
 
-    const headers = ['Name', 'Job Title', 'Email Address'];
+    const headers = ['Name', 'Job Title', 'Email Address', 'Scraped URL'];
 
     const tableData = data.map(item => ({
       name: item.name,
       jobTitle: item.jobTitle,
       email: item.email,
+      url: item.url, // Include the URL in the Excel data
     }));
 
     // Create a worksheet from the table data
@@ -61,59 +67,110 @@ export default function ScraperPage() {
     XLSX.writeFile(workbook, 'staff_data.xlsx');
   };
 
+  // Function to clear the table data
+  const handleClearData = () => {
+    setData([]);
+    setSearchTerm('');
+  };
+
+  // Filter data based on searchTerm (case insensitive)
+  const filteredData = data.filter((item) =>
+    item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen bg-gray-100 p-10">
-      <h1 className="text-3xl font-bold mb-5">School Staff List Demo</h1>
-      <form onSubmit={handleSubmit} className="mb-5">
+    <div className="min-h-screen bg-gray-100 py-5 px-10">
+      {/* Logo at the top */}
+      <div className="flex justify-start">
+        <img src="/oksgroups.jpg" alt="Logo" className="h-16" /> {/* Adjust the path and size */}
+      </div>
+      
+
+      
+      {/* URL input and Scrape button on the same row */}
+      <form onSubmit={handleSubmit} className="my-5 flex items-center space-x-2">
         <input
           type="text"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Enter website URL"
-          className="border p-2 rounded w-full mb-3"
+          className="border p-2 rounded w-full"
         />
         <button
           type="submit"
           className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+          disabled={loading} // Disable button while loading
         >
-          Scrape
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle className="text-white" cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="4"/></svg>
+              Loading...
+            </span>
+          ) : (
+            "Scrape"
+          )}
         </button>
       </form>
-
-      {loading && <p>Scraping data, please wait...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-
-      {/* Button to download Excel */}
-      {data && (
-        <div className="mb-5 flex flex-row justify-end">
-          <button
-            onClick={handleDownloadExcel}
-            className="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600"
-          >
-            Download as Excel
-          </button>
+ 
+      {error && <p className="text-red-500 text-center">{error}</p>}
+     
+      {/* Search, Download, and Clear buttons on the same row */}
+      {data.length > 0 && (
+        
+        <div className="mt-6 mb-1 flex justify-between items-center">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search..."
+            className="border p-2 rounded w-[70%]"
+          />
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleDownloadExcel}
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+            >
+              Download Excel
+            </button>
+            <button
+              onClick={handleClearData}
+              className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       )}
 
       {/* Display the scraped data in a table */}
-      {data && (
-        <div className="overflow-x-auto">
+      {data.length > 0 && (
+        <div className="overflow-x-auto"> 
           <table className="min-w-full bg-white rounded shadow">
             <thead>
               <tr className="bg-gray-800 text-white">
                 <th className="py-2 px-4 text-left">Name</th>
                 <th className="py-2 px-4 text-left">Job Title</th>
                 <th className="py-2 px-4 text-left">Email Address</th>
+                <th className="py-2 px-4 text-left">Scraped URL</th> {/* New Column */}
               </tr>
             </thead>
             <tbody>
-              {data.map((item, index) => (
-                <tr key={index} className="border-t">
-                  <td className="py-2 px-4">{item.name}</td>
-                  <td className="py-2 px-4">{item.jobTitle}</td>
-                  <td className="py-2 px-4">{item.email}</td>
+              {filteredData.length > 0 ? (
+                filteredData.map((item, index) => (
+                  <tr key={index} className="border-t">
+                    <td className="py-2 px-4">{item.name}</td>
+                    <td className="py-2 px-4">{item.jobTitle}</td>
+                    <td className="py-2 px-4">{item.email}</td>
+                    <td className="py-2 px-4">{item.url}</td> {/* Display the URL */}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="py-2 px-4 text-center">No matching results found.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

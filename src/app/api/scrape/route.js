@@ -10,6 +10,14 @@ export async function POST(request) {
     'lmsd': '.fsConstituentItem',
     'd11': '.fsConstituentItem',
     'mnps': '.DIR-item',
+    'edwardsburgpublicschools':'.staff',
+    'rcboe':'.ui-articles',
+    'prsd1435':'.staff',
+    'ga':'.fsConstituentItem',
+    'benzieschools':'.vc_grid-item',
+    'lausd':'.staff',
+    'bufsd':'.fsConstituentItem',
+    'southwestr1':'wixui-column-strip'
   };
 
   // Function to extract the domain name
@@ -18,18 +26,18 @@ export async function POST(request) {
     return hostname.split('.').slice(-2, -1)[0];
   };
   const domainName = extractDomainName(url);
-
+  console.log(domainName)
   try {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
-
+    console.log(schools[domainName])
     // Add a delay to wait for the JavaScript-rendered content
-    await page.waitForSelector(`table, ${schools[domainName]}`, { timeout: 5000 }); // Adjust the selector if needed
+    await page.waitForSelector(`table,  ${schools[domainName]}`, { timeout: 5000 }); // Adjust the selector if needed
 
     const staffData = await page.evaluate((schools, domainName) => {
       let staffData = [];
-      const nameClasses = ['fsFullName', 'ws-dd-person-name', 'DIR-name'];
+      const nameClasses = ['fsFullName', 'ws-dd-person-name', 'DIR-name','email','vc_custom_heading'];
       const jobTitleClasses = ['fsTitles', 'ws-dd-person-position', 'DIR-title'];
 
       const findFirstMatch = (element, classArray) => {
@@ -72,6 +80,15 @@ export async function POST(request) {
           const emailLink = element.querySelector('a[href^="mailto:"]');
           if (emailLink) {
             email = extractCleanEmail(emailLink.href.replace('mailto:', '').trim());
+          }else{
+               // Find email from the element's text content
+              const emailPattern = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+              const elementText = element.textContent.trim();
+              // Check if the text content contains a valid email pattern
+              const foundEmail = elementText.match(emailPattern);
+              if (foundEmail) {
+                email = foundEmail[0].trim();
+              }
           }
 
           // Validate the job title

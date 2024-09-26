@@ -70,6 +70,29 @@ export async function POST(request) {
         }
         return null;
       };
+
+      const extractEmail=(text)=>{
+        // Regular expression to match email patterns
+        const emailPattern = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
+        // Search for the email within the text using the regex
+        const foundEmail = text.match(emailPattern);
+        // Return the found email or null if no email is found
+        return foundEmail ? foundEmail[0].trim() : null;
+      }
+
+      const cleanName=(fullName)=>{
+        // Define an array of unwanted words to remove from the full name
+        const unwantedWords = ['Email', 'Name', 'Title', 'Main', 'Phone'];
+      
+        // Create a regular expression from the unwanted words
+        const unwantedPattern = new RegExp(`\\b(${unwantedWords.join('|')})\\b`, 'gi');
+      
+        // Replace the unwanted words with an empty string
+        const cleanedName = fullName.replace(unwantedPattern, '').trim();
+      
+        // Remove any extra spaces caused by the replacements
+        return cleanedName.replace(/\s+/g, ' ').trim();
+      }
  
         const elements = document.querySelectorAll(schools[domainName]); 
         if (elements.length === 0) {
@@ -77,7 +100,7 @@ export async function POST(request) {
             const cells = row.querySelectorAll('td');
   
             if (cells.length > 0) {
-              const name = cells[0]?.innerText.trim();  // Name is always in the first cell
+              const name = cleanName(cells[0]?.innerText.trim());  // Name is always in the first cell
               let email = null;
               let jobTitle = null;
   
@@ -96,7 +119,7 @@ export async function POST(request) {
                 const cellText = cell.innerText.trim();
                 const extractedEmail = extractCleanEmail(cellText);
                 if (extractedEmail) {
-                  email = extractedEmail;
+                  email = extractEmail(extractedEmail);
                 }
               });
   
@@ -108,19 +131,21 @@ export async function POST(request) {
         }
         
         elements.forEach((element) => {
-            const name = findFirstMatch(element, nameClasses);
+            let name = findFirstMatch(element, nameClasses);
+            name = cleanName(name)
             let jobTitle = findFirstMatch(element, jobTitleClasses);
             let email = null;
         
             const emailLink = element.querySelector('a[href^="mailto:"]');
             if (emailLink) {
                 email = extractCleanEmail(emailLink.href.replace('mailto:', '').trim());
+                email = extractEmail(email)
             } else {
                 const emailPattern = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
                 const elementText = element.textContent.trim();
                 const foundEmail = elementText.match(emailPattern);
                 if (foundEmail) {
-                    email = foundEmail[0].trim();
+                    email = extractEmail(foundEmail[0].trim());
                 }
             }
         

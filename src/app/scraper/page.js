@@ -119,7 +119,7 @@ export default function ScraperPage() {
       {/* Search, Download, and Clear buttons on the same row */}
       {data.length > 0 && (
         
-        <div className="mt-6 mb-1 flex justify-between items-center">
+        <div className="mt-10 mb-1 flex justify-between items-center">
           <input
             type="text"
             value={searchTerm}
@@ -146,35 +146,44 @@ export default function ScraperPage() {
 
       {/* Display the scraped data in a table */}
       {data.length > 0 && (
-        <div className="overflow-x-auto"> 
-          <table className="min-w-full bg-white rounded shadow">
-            <thead>
-              <tr className="bg-gray-800 text-white">
-                <th className="py-2 px-4 text-left">Name</th>
-                <th className="py-2 px-4 text-left">Job Title</th>
-                <th className="py-2 px-4 text-left">Email Address</th>
-                <th className="py-2 px-4 text-left">Scraped URL</th> {/* New Column */}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.length > 0 ? (
-                filteredData.map((item, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="py-2 px-4">{item.name}</td>
-                    <td className="py-2 px-4">{item.jobTitle}</td>
-                    <td className="py-2 px-4">{item.email}</td>
-                    <td className="py-2 px-4">{item.url}</td> {/* Display the URL */}
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4" className="py-2 px-4 text-center">No matching results found.</td>
+        <>
+          {/* Show the count of data items */}
+          <p className="mt-1 mb-2 text-sm font-semibold text-gray-600">
+            Showing {filteredData.length} {filteredData.length === 1 ? 'record' : 'records'} out of {data.length} total
+          </p>
+
+          {/* Display the scraped data in a table */}
+          <div className="overflow-x-auto"> 
+            <table className="min-w-full bg-white rounded shadow">
+              <thead>
+                <tr className="bg-gray-800 text-white">
+                  <th className="py-2 px-4 text-left">Name</th>
+                  <th className="py-2 px-4 text-left">Job Title</th>
+                  <th className="py-2 px-4 text-left">Email Address</th>
+                  <th className="py-2 px-4 text-left">Scraped URL</th> {/* New Column */}
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredData.length > 0 ? (
+                  filteredData.map((item, index) => (
+                    <tr key={index} className="border-t">
+                      <td className="py-2 px-4">{item.name}</td>
+                      <td className="py-2 px-4">{item.jobTitle}</td>
+                      <td className="py-2 px-4">{item.email}</td>
+                      <td className="py-2 px-4">{item.url}</td> {/* Display the URL */}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="py-2 px-4 text-center">No matching results found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
+
     </div>
   );
 }

@@ -11,13 +11,13 @@ export async function POST(request) {
     'd11': '.fsConstituentItem',
     'mnps': '.DIR-item',
     'edwardsburgpublicschools':'.staff',
-    'rcboe':'.ui-articles',
+    'rcboe':'.ui-article-description',
     'prsd1435':'.staff',
     'ga':'.fsConstituentItem',
     'benzieschools':'.vc_grid-item',
     'lausd':'.staff',
     'bufsd':'.fsConstituentItem',
-    'southwestr1':'wixui-column-strip'
+    'southwestr1':'.wixui-column-strip'
   };
 
   // Function to extract the domain name
@@ -38,7 +38,7 @@ export async function POST(request) {
     const staffData = await page.evaluate((schools, domainName) => {
       let staffData = [];
       const nameClasses = ['fsFullName', 'ws-dd-person-name', 'DIR-name','email','vc_custom_heading'];
-      const jobTitleClasses = ['fsTitles', 'ws-dd-person-position', 'DIR-title'];
+      const jobTitleClasses = ['fsTitles', 'ws-dd-person-position', 'DIR-title','user-position'];
 
       const findFirstMatch = (element, classArray) => {
         for (const className of classArray) {

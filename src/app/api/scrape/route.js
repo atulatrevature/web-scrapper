@@ -82,15 +82,9 @@ export async function POST(request) {
 
       const cleanName=(fullName)=>{
         // Define an array of unwanted words to remove from the full name
-        const unwantedWords = ['Email', 'Name', 'Title', 'Main', 'Phone'];
-      
-        // Create a regular expression from the unwanted words
-        const unwantedPattern = new RegExp(`\\b(${unwantedWords.join('|')})\\b`, 'gi');
-      
-        // Replace the unwanted words with an empty string
-        const cleanedName = fullName.replace(unwantedPattern, '').trim();
-      
-        // Remove any extra spaces caused by the replacements
+        const unwantedWords = ['Email', 'Name', 'Title', 'Main', 'Phone']; 
+        const unwantedPattern = new RegExp(`\\b(${unwantedWords.join('|')})\\b`, 'gi'); 
+        const cleanedName = fullName.replace(unwantedPattern, '').trim(); 
         return cleanedName.replace(/\s+/g, ' ').trim();
       }
  

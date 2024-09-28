@@ -16,7 +16,7 @@ export default function ScraperPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/scrape', {
+      const response = await fetch('/api/scrape1', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

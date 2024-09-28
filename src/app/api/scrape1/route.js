@@ -1,4 +1,7 @@
-import puppeteer from 'puppeteer';
+import { NextResponse } from 'next/server';
+import chromium from 'chrome-aws-lambda';
+import puppeteer from 'puppeteer-core';
+
 
 export async function POST(request) {
   const { url } = await request.json();
@@ -28,7 +31,13 @@ export async function POST(request) {
   const domainName = extractDomainName(url);
   console.log(domainName)
   try {
-    const browser = await puppeteer.launch();
+    // const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath,
+      headless: true,
+      ignoreHTTPSErrors: true,
+    });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
     console.log(schools[domainName])
@@ -154,9 +163,9 @@ export async function POST(request) {
     }, schools, domainName);
 
     await browser.close();
-    return new Response(JSON.stringify(staffData), { status: 200 });
+    return  NextResponse(JSON.stringify(staffData), { status: 200 });
   } catch (error) {
     console.error('Scraping failed:', error);
-    return new Response(JSON.stringify({ message: 'Failed to scrape data.' }), { status: 500 });
+    return  NextResponse(JSON.stringify({ message: 'Failed to scrape data.' }), { status: 500 });
   }
 }

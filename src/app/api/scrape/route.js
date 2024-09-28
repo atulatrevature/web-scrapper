@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 
+const chromium = require('chrome-aws-lambda');
 export async function POST(request) {
   const { url } = await request.json();
 
@@ -28,7 +29,13 @@ export async function POST(request) {
   const domainName = extractDomainName(url);
   console.log(domainName)
   try {
-    const browser = await puppeteer.launch();
+    const browser = await chromium.puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
+    });
     //  const browser = await puppeteer.launch({
     //   args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
     //   executablePath: await chromium.executablePath,

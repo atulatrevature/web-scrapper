@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer';
-
+import chromium from "@sparticuz/chromium";
 export async function POST(request) {
   const { url } = await request.json();
 
@@ -28,12 +28,12 @@ export async function POST(request) {
   const domainName = extractDomainName(url);
   console.log(domainName)
   try {
-    const browser = await puppeteer.launch();
-    //  const browser = await puppeteer.launch({
-    //   args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
-    //   executablePath: await chromium.executablePath,
-    //   headless: true,
-    // });
+    // const browser = await puppeteer.launch();
+     const browser = await puppeteer.launch({
+      args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+      // executablePath: await chromium.executablePath,
+      headless: true,
+    });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
     console.log(schools[domainName])

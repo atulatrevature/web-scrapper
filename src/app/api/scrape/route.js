@@ -1,6 +1,6 @@
-// import puppeteer from 'puppeteer-code';
-const puppeteer = require ('puppeteer');
-import chromium from "@sparticuz/chromium";
+// import puppeteer from 'puppeteer';
+const chromium = require("@sparticuz/chromium");
+const puppeteer = require("puppeteer-core");
 export async function POST(request) {
   const { url } = await request.json();
 
@@ -31,10 +31,11 @@ export async function POST(request) {
   try {
     // const browser = await puppeteer.launch();
     // console.log( await chromium.executablePath())
+    
      const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
-      executablePath:  await chromium.executablePath(),
+      executablePath: '/usr/bin/chromium-browser',
       headless: chromium.headless,
       ignoreHTTPSErrors: true,
     });

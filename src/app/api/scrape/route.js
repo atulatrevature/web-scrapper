@@ -30,9 +30,11 @@ export async function POST(request) {
   try {
     // const browser = await puppeteer.launch();
      const browser = await puppeteer.launch({
-      args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
-      // executablePath: await chromium.executablePath,
-      headless: true,
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });

@@ -16,7 +16,7 @@ export default function ScraperPage() {
     setError(null);
 
     try {
-      const response = await fetch('https://ec2-13-60-104-64.eu-north-1.compute.amazonaws.com/scrape', {
+      const response = await fetch('https://api.gooseberrytechnovision.com/scrape', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

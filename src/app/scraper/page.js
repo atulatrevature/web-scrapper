@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import * as XLSX from 'xlsx'; // Importing the xlsx library for Excel download
+import ClassConfigurationModal from '../components/classesConfig'
 
 export default function ScraperPage() {
   const [url, setUrl] = useState('');
@@ -16,7 +17,7 @@ export default function ScraperPage() {
     setError(null);
 
     try {
-      const response = await fetch('https://api.gooseberrytechnovision.com/scrape', {
+      const response = await fetch('http://localhost:3000/scrape', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,8 +84,9 @@ export default function ScraperPage() {
   return (
     <div className="min-h-screen bg-gray-100 py-5 px-10">
       {/* Logo at the top */}
-      <div className="flex justify-start">
+      <div className="flex justify-between">
         <img src="/oksgroups.jpg" alt="Logo" className="h-16" /> {/* Adjust the path and size */}
+        <ClassConfigurationModal />
       </div>
       
 

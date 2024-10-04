@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { FaTrash } from 'react-icons/fa';
+import axios from 'axios';
 
 const ClassConfigurationModal = () => {
     const [isOpen, setIsOpen] = useState(false); // Modal state
@@ -10,16 +11,15 @@ const ClassConfigurationModal = () => {
     useEffect(() => {
         const fetchClasses = async () => {
             try {
-                const response = await fetch('http://localhost:3000/potentialClasses', {
-                    method: 'GET',
+                const response = await axios.get('http://localhost:3000/potentialClasses', {
                     headers: {
                         'Content-Type': 'application/json',
                     },
                 });
-                const data = await response.json();
-                if (response.ok) {
-                    setClasses(data);
-                    console.log(data)
+
+                if (response.status === 200) {
+                    setClasses(response.data);
+                    console.log(response.data);
                 }
             } catch (error) {
                 console.error('Error fetching potential classes:', error);
@@ -77,19 +77,18 @@ const ClassConfigurationModal = () => {
 
     const handleSave = async () => {
         try {
-            const response = await fetch('http://localhost:3000/potentialClasses', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(classes),
-            });
+            const response = await axios.post('http://localhost:3000/potentialClasses', classes,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
 
-            const data = await response.json();
-            if (response.ok && data.success) {
+            if (response.status === 200 && response.data.success) {
                 setIsOpen(false);
             } else {
-                alert('Failed to save classes:', data.message);
+                alert('Failed to save classes:', response.data.message);
             }
         } catch (error) {
             console.error('Error saving potential classes:', error);
@@ -156,7 +155,7 @@ const ClassConfigurationModal = () => {
                                                 ? Object.entries(classes[category]).map(([domain, classValue], index) => (
                                                     <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                                         <td className="px-6 py-4">{domain}</td>
-                                                        <td className="px-6 py-4">{classValue}</td>
+                                                        <td className="px-6 py-4">{classValue.selector}</td>
                                                         <td className="px-6 py-4">
                                                             <button
                                                                 onClick={() => handleDelete(category, index)}

@@ -100,7 +100,7 @@ const SelectorModal = ({ url, isOpen, setIsOpen }) => {
                                     />
                                 </div>
                             ))
-                        ) : (<p>No snippets available.</p>)}
+                        ) : (<p>{loading?"Loading...":"No snippets available."}</p>)}
                     </div>
 
                     {/* Modal Footer */}

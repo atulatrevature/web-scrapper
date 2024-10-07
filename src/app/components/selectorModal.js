@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 const SelectorModal = ({ url, isOpen, setIsOpen }) => {
     const [data, setData] = useState([]);
     const [selectedKeys, setSelectedKeys] = useState({});
@@ -16,9 +18,8 @@ const SelectorModal = ({ url, isOpen, setIsOpen }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/scrapeWebsiteSnippets`, { params: { url: url } });
+                const response = await axios.get(apiUrl+`/scrapeWebsiteSnippets`, { params: { url: url } });
                 setHtmlSnippets(response.data.htmlSnippets);
-                console.log(response.data.htmlSnippets)
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -30,11 +31,55 @@ const SelectorModal = ({ url, isOpen, setIsOpen }) => {
 
     const handleClassSelection = () => {
         if (currentStep === 'staffClasses') {
+            const tempDiv = document.createElement('div');
+
+            tempDiv.innerHTML = htmlSnippets[selectedClasses.staffClasses];
+
+            const elements = Array.from(tempDiv.querySelectorAll('*'));
+            let snippets = {};
+
+            elements.forEach(element => {
+                const outerHTML = element.outerHTML.trim();
+                const textContent = element.textContent.trim();
+
+                if (outerHTML && textContent) {
+                    let selector = '';
+
+                    if (element.className) {
+                        selector = `.${element.className.split(' ').join('.')}`;
+                    } else if (element.id) {
+                        selector = `#${element.id}`;
+                    } else {
+                        selector = element.tagName.toLowerCase();
+                    }
+
+                    if (!snippets[selector]) {
+                        snippets[selector] = outerHTML;
+                    }
+                    const childElements = Array.from(element.children);
+                    childElements.forEach(child => {
+                        const childOuterHTML = child.outerHTML.trim();
+                        const childTextContent = child.textContent.trim();
+                        let childSelector = '';
+
+                        if (child.className) {
+                            childSelector = `${selector} .${child.className.split(' ').join('.')}`;
+                        } else {
+                            childSelector = `${selector} ${child.tagName.toLowerCase()}`;
+                        }
+
+                        if (childOuterHTML && childTextContent) {
+                            snippets[childSelector] = childOuterHTML;
+                        }
+                    });
+                }
+            });
+
+            setHtmlSnippets({ ...htmlSnippets, ...snippets })
             setCurrentStep('nameClasses');
         } else if (currentStep === 'nameClasses') {
             setCurrentStep('jobTitleClasses');
         } else if (currentStep === 'jobTitleClasses') {
-            console.log(selectedClasses);
             savePotentialClasses({ url, ...selectedClasses });
         }
     };
@@ -49,8 +94,7 @@ const SelectorModal = ({ url, isOpen, setIsOpen }) => {
 
     const savePotentialClasses = async (data) => {
         try {
-            const response = await axios.put('http://localhost:3000/potentialClasses', data);
-            console.log(response.data.message);
+            const response = await axios.put(apiUrl+'/potentialClasses', data);
             if (response.status === 200 && response.data.success) {
                 setIsOpen(false);
             } else {
@@ -100,7 +144,7 @@ const SelectorModal = ({ url, isOpen, setIsOpen }) => {
                                     />
                                 </div>
                             ))
-                        ) : (<p>{loading?"Loading...":"No snippets available."}</p>)}
+                        ) : (<p>{loading ? "Loading..." : "No snippets available."}</p>)}
                     </div>
 
                     {/* Modal Footer */}

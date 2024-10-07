@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import axios from 'axios';
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 const ClassConfigurationModal = () => {
     const [isOpen, setIsOpen] = useState(false); // Modal state
     const [classes, setClasses] = useState([]); // State to store the classes
@@ -11,7 +13,7 @@ const ClassConfigurationModal = () => {
     useEffect(() => {
         const fetchClasses = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/potentialClasses', {
+                const response = await axios.get(apiUrl+'/potentialClasses', {
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -19,7 +21,6 @@ const ClassConfigurationModal = () => {
 
                 if (response.status === 200) {
                     setClasses(response.data);
-                    console.log(response.data);
                 }
             } catch (error) {
                 console.error('Error fetching potential classes:', error);
@@ -77,7 +78,7 @@ const ClassConfigurationModal = () => {
 
     const handleSave = async () => {
         try {
-            const response = await axios.post('http://localhost:3000/potentialClasses', classes,
+            const response = await axios.post(apiUrl+'/potentialClasses', classes,
                 {
                     headers: {
                         'Content-Type': 'application/json',

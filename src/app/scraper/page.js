@@ -6,6 +6,8 @@ import ClassConfigurationModal from '../components/classesConfig'
 import SelectorModal from '../components/selectorModal'
 import axios from 'axios';
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 export default function ScraperPage() {
   const [url, setUrl] = useState('');
   const [data, setData] = useState([]); // Initialize data as an empty array
@@ -25,13 +27,13 @@ export default function ScraperPage() {
     setError(null);
 
     try {
-      const response = await axios.get(`http://localhost:3000/getStaffClassByDomain`, { params: { url: url } });
+      const response = await axios.get(apiUrl+`/getStaffClassByDomain`, { params: { url: url } });
 
       const data = response.data;
       if (data.success && data.data) {
         setShowModal(false);
         try {
-          const response = await axios.post('http://localhost:3000/scrape', { url },
+          const response = await axios.post(apiUrl+'/scrape', { url },
             {
               headers: {
                 'Content-Type': 'application/json',

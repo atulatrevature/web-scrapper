@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import * as XLSX from 'xlsx'; // Importing the xlsx library for Excel download
+import ClassConfigurationModal from '../components/classesConfig'
+import SelectorModal from '../components/selectorModal'
+import axios from 'axios';
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ScraperPage() {
   const [url, setUrl] = useState('');
@@ -9,34 +14,50 @@ export default function ScraperPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState(''); // New state for search input
+  const [showModal, setShowModal] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!url.trim()) {
+      setError("Please Enter a valid URL to scrape")
+      return
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('https://api.gooseberrytechnovision.com/scrape', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      });
+      const response = await axios.get(apiUrl+`/getStaffClassByDomain`, { params: { url: url } });
 
-      const result = await response.json();
-      if (response.ok) {
-        const updatedData = result.map((item) => ({
-          ...item,
-          url, // Add the scraped URL to each item
-        }));
-        // Append new scraped data to the existing data
-        setData((prevData) => [...prevData, ...updatedData]);
+      const data = response.data;
+      if (data.success && data.data) {
+        setShowModal(false);
+        try {
+          const response = await axios.post(apiUrl+'/scrape', { url },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            }
+          );
+          if (response.status === 200) {
+            const updatedData = response.data.map((item) => ({
+              ...item,
+              url, // Add the scraped URL to each item
+            }));
+            // Append new scraped data to the existing data
+            setData((prevData) => [...prevData, ...updatedData]);
+          } else {
+            setError(response.data.message);
+          }
+        } catch (err) {
+          setError('Failed to fetch data.');
+        }
       } else {
-        setError(result.message);
+        setShowModal(true);
       }
-    } catch (err) {
-      setError('Failed to fetch data.');
+    } catch (error) {
+      console.error('Error fetching domain data:', error);
     }
 
     setLoading(false);
@@ -83,12 +104,11 @@ export default function ScraperPage() {
   return (
     <div className="min-h-screen bg-gray-100 py-5 px-10">
       {/* Logo at the top */}
-      <div className="flex justify-start">
+      <div className="flex justify-between">
         <img src="/oksgroups.jpg" alt="Logo" className="h-16" /> {/* Adjust the path and size */}
+        <ClassConfigurationModal />
       </div>
-      
 
-      
       {/* URL input and Scrape button on the same row */}
       <form onSubmit={handleSubmit} className="my-5 flex items-center space-x-2">
         <input
@@ -105,7 +125,7 @@ export default function ScraperPage() {
         >
           {loading ? (
             <span className="flex items-center justify-center">
-              <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle className="text-white" cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="4"/></svg>
+              <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle className="text-white" cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="4" /></svg>
               Loading...
             </span>
           ) : (
@@ -113,12 +133,12 @@ export default function ScraperPage() {
           )}
         </button>
       </form>
- 
+
       {error && <p className="text-red-500 text-center">{error}</p>}
-     
+
       {/* Search, Download, and Clear buttons on the same row */}
       {data.length > 0 && (
-        
+
         <div className="mt-10 mb-1 flex justify-between items-center">
           <input
             type="text"
@@ -153,7 +173,7 @@ export default function ScraperPage() {
           </p>
 
           {/* Display the scraped data in a table */}
-          <div className="overflow-x-auto"> 
+          <div className="overflow-x-auto">
             <table className="min-w-full bg-white rounded shadow">
               <thead>
                 <tr className="bg-gray-800 text-white">
@@ -183,7 +203,7 @@ export default function ScraperPage() {
           </div>
         </>
       )}
-
+      {showModal && <SelectorModal url={url} setIsOpen={setShowModal} isOpen={showModal} />}
     </div>
   );
 }

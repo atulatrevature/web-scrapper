@@ -27,11 +27,7 @@ export async function POST(request) {
     return hostname.split('.').slice(-2, -1)[0];
   };
   const domainName = extractDomainName(url);
-  console.log(domainName)
   try {
-    // const browser = await puppeteer.launch();
-    // console.log( await chromium.executablePath())
-    
      const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
@@ -41,7 +37,6 @@ export async function POST(request) {
     });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
-    console.log(schools[domainName])
     // Add a delay to wait for the JavaScript-rendered content
     await page.waitForSelector(`table,  ${schools[domainName]}`, { timeout: 15000 }); // Adjust the selector if needed
 

@@ -36,35 +36,51 @@ export default function ScraperPage() {
     setError(null);
 
     try {
-      const response = await axios.get(apiUrl + `/getStaffClassByDomain`, { params: { url: url } });
-
-      const data = response.data;
-      if (data.success && data.data) {
-        setShowModal(false);
-        try {
-          const response = await axios.post(apiUrl + '/scrape', { url },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              }
-            }
-          );
-          if (response.status === 200) {
-            const updatedData = response.data.map((item) => ({
-              ...item,
-              url, // Add the scraped URL to each item
-            }));
-            // Append new scraped data to the existing data
-            setData((prevData) => [...prevData, ...updatedData]);
-          } else {
-            setError(response.data.message);
-          }
-        } catch (err) {
-          setError('Failed to fetch data.');
+      setShowModal(false);
+      const response = await axios.post(apiUrl + '/scrape', { url });
+      if (response.status === 200) {
+        if (response.data.length) {
+          const updatedData = response.data.map((item) => ({
+            ...item,
+            url, // Add the scraped URL to each item
+          }));
+          // Append new scraped data to the existing data
+          setData((prevData) => [...prevData, ...updatedData]);
+        } else if (!response.data.length) {
+          setShowModal(true);
+        } else {
+          setError(response.data.message);
         }
-      } else {
-        setShowModal(true);
       }
+      // const response = await axios.get(apiUrl + `/getStaffClassByDomain`, { params: { url: url } });
+
+      // const data = response.data;
+      // if (data.success && data.data) {
+      //   setShowModal(false);
+      //   try {
+      //     const response = await axios.post(apiUrl + '/scrape', { url },
+      //       {
+      //         headers: {
+      //           'Content-Type': 'application/json',
+      //         }
+      //       }
+      //     );
+      //     if (response.status === 200) {
+      //       const updatedData = response.data.map((item) => ({
+      //         ...item,
+      //         url, // Add the scraped URL to each item
+      //       }));
+      //       // Append new scraped data to the existing data
+      //       setData((prevData) => [...prevData, ...updatedData]);
+      //     } else {
+      //       setError(response.data.message);
+      //     }
+      //   } catch (err) {
+      //     setError('Failed to fetch data.');
+      //   }
+      // } else {
+      //   setShowModal(true);
+      // }
     } catch (error) {
       console.error('Error fetching domain data:', error);
     }
@@ -214,6 +230,7 @@ export default function ScraperPage() {
             <table className="min-w-full bg-white rounded shadow">
               <thead>
                 <tr className="bg-gray-800 text-white">
+                  <th className="py-2 px-4 text-left">S.No</th>
                   <th className="py-2 px-4 text-left">Name</th>
                   <th className="py-2 px-4 text-left">Job Title</th>
                   <th className="py-2 px-4 text-left">Email Address</th>
@@ -224,6 +241,9 @@ export default function ScraperPage() {
               <tbody>
                 {filteredData.map((item, index) => (
                   <tr key={index} className="border-t">
+                    <td className="py-2 px-4">
+                      {item.originalIndex + 1}
+                    </td>
                     <td className="py-2 px-4">
                       {editingIndex === item.originalIndex ? (
                         <input

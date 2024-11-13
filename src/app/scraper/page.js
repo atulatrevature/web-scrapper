@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx'; // Importing the xlsx library for Excel download
 import ClassConfigurationModal from '../components/classesConfig'
 import SelectorModal from '../components/selectorModal'
 import axios from 'axios';
-
+import { IconEdit, IconTrash, IconPlus, IconCheck, IconX } from '@tabler/icons-react';
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ScraperPage() {
@@ -15,6 +15,15 @@ export default function ScraperPage() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState(''); // New state for search input
   const [showModal, setShowModal] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newRow, setNewRow] = useState({
+    name: '',
+    jobTitle: '',
+    email: '',
+    url: ''
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,35 +36,51 @@ export default function ScraperPage() {
     setError(null);
 
     try {
-      const response = await axios.get(apiUrl+`/getStaffClassByDomain`, { params: { url: url } });
-
-      const data = response.data;
-      if (data.success && data.data) {
-        setShowModal(false);
-        try {
-          const response = await axios.post(apiUrl+'/scrape', { url },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              }
-            }
-          );
-          if (response.status === 200) {
-            const updatedData = response.data.map((item) => ({
-              ...item,
-              url, // Add the scraped URL to each item
-            }));
-            // Append new scraped data to the existing data
-            setData((prevData) => [...prevData, ...updatedData]);
-          } else {
-            setError(response.data.message);
-          }
-        } catch (err) {
-          setError('Failed to fetch data.');
+      setShowModal(false);
+      const response = await axios.post(apiUrl + '/scrape', { url });
+      if (response.status === 200) {
+        if (response.data.length) {
+          const updatedData = response.data.map((item) => ({
+            ...item,
+            url, // Add the scraped URL to each item
+          }));
+          // Append new scraped data to the existing data
+          setData((prevData) => [...prevData, ...updatedData]);
+        } else if (!response.data.length) {
+          setShowModal(true);
+        } else {
+          setError(response.data.message);
         }
-      } else {
-        setShowModal(true);
       }
+      // const response = await axios.get(apiUrl + `/getStaffClassByDomain`, { params: { url: url } });
+
+      // const data = response.data;
+      // if (data.success && data.data) {
+      //   setShowModal(false);
+      //   try {
+      //     const response = await axios.post(apiUrl + '/scrape', { url },
+      //       {
+      //         headers: {
+      //           'Content-Type': 'application/json',
+      //         }
+      //       }
+      //     );
+      //     if (response.status === 200) {
+      //       const updatedData = response.data.map((item) => ({
+      //         ...item,
+      //         url, // Add the scraped URL to each item
+      //       }));
+      //       // Append new scraped data to the existing data
+      //       setData((prevData) => [...prevData, ...updatedData]);
+      //     } else {
+      //       setError(response.data.message);
+      //     }
+      //   } catch (err) {
+      //     setError('Failed to fetch data.');
+      //   }
+      // } else {
+      //   setShowModal(true);
+      // }
     } catch (error) {
       console.error('Error fetching domain data:', error);
     }
@@ -95,11 +120,39 @@ export default function ScraperPage() {
   };
 
   // Filter data based on searchTerm (case insensitive)
-  const filteredData = data.filter((item) =>
-    item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = data.filter((item, index) => {
+    item['originalIndex'] = index;
+    return item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  }
   );
+
+  const handleEdit = (index) => {
+    setEditingIndex(index);
+    setEditForm(data[index]);
+  };
+
+  const handleSaveEdit = () => {
+    const newData = [...data];
+    newData[editingIndex] = editForm;
+    setData(newData);
+    setEditingIndex(null);
+    setEditForm({});
+  };
+
+  const handleDelete = (index) => {
+    if (confirm('Are you sure you want to delete this row? This action cannot be undone.')) {
+      const newData = data.filter((_, i) => i !== index);
+      setData(newData);
+    }
+  };
+
+  const handleAddRow = () => {
+    setData([...data, newRow]);
+    setNewRow({ name: '', jobTitle: '', email: '', url: '' });
+    setShowAddForm(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-5 px-10">
@@ -177,29 +230,159 @@ export default function ScraperPage() {
             <table className="min-w-full bg-white rounded shadow">
               <thead>
                 <tr className="bg-gray-800 text-white">
+                  <th className="py-2 px-4 text-left">S.No</th>
                   <th className="py-2 px-4 text-left">Name</th>
                   <th className="py-2 px-4 text-left">Job Title</th>
                   <th className="py-2 px-4 text-left">Email Address</th>
-                  <th className="py-2 px-4 text-left">Scraped URL</th> {/* New Column */}
+                  <th className="py-2 px-4 text-left">Scraped URL</th>
+                  <th className="py-2 px-4 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredData.length > 0 ? (
-                  filteredData.map((item, index) => (
-                    <tr key={index} className="border-t">
-                      <td className="py-2 px-4">{item.name}</td>
-                      <td className="py-2 px-4">{item.jobTitle}</td>
-                      <td className="py-2 px-4">{item.email}</td>
-                      <td className="py-2 px-4">{item.url}</td> {/* Display the URL */}
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="py-2 px-4 text-center">No matching results found.</td>
+                {filteredData.map((item, index) => (
+                  <tr key={index} className="border-t">
+                    <td className="py-2 px-4">
+                      {item.originalIndex + 1}
+                    </td>
+                    <td className="py-2 px-4">
+                      {editingIndex === item.originalIndex ? (
+                        <input
+                          type="text"
+                          value={editForm.name}
+                          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                          className="w-full p-1 border rounded"
+                        />
+                      ) : (
+                        item.name
+                      )}
+                    </td>
+                    <td className="py-2 px-4">
+                      {editingIndex === item.originalIndex ? (
+                        <input
+                          type="text"
+                          value={editForm.jobTitle}
+                          onChange={(e) => setEditForm({ ...editForm, jobTitle: e.target.value })}
+                          className="w-full p-1 border rounded"
+                        />
+                      ) : (
+                        item.jobTitle
+                      )}
+                    </td>
+                    <td className="py-2 px-4">
+                      {editingIndex === item.originalIndex ? (
+                        <input
+                          type="email"
+                          value={editForm.email}
+                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                          className="w-full p-1 border rounded"
+                        />
+                      ) : (
+                        item.email
+                      )}
+                    </td>
+                    <td className="py-2 px-4">{item.url}</td>
+                    <td className="py-2 px-4">
+                      {editingIndex === item.originalIndex ? (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleSaveEdit}
+                            className="p-1 text-green-600 hover:text-green-800"
+                          >
+                            <IconCheck size={20} stroke={1.5} />
+                          </button>
+                          <button
+                            onClick={() => setEditingIndex(null)}
+                            className="p-1 text-red-600 hover:text-red-800"
+                          >
+                            <IconX size={20} stroke={1.5} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(item.originalIndex)}
+                            className="p-1 text-blue-600 hover:text-blue-800"
+                          >
+                            <IconEdit size={20} stroke={1.5} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.originalIndex)}
+                            className="p-1 text-red-600 hover:text-red-800"
+                          >
+                            <IconTrash size={20} stroke={1.5} />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {showAddForm && (
+                  <tr className="border-t">
+                    <td className="py-2 px-4">
+                      <input
+                        type="text"
+                        value={newRow.name}
+                        onChange={(e) => setNewRow({ ...newRow, name: e.target.value })}
+                        className="w-full p-1 border rounded"
+                        placeholder="Name"
+                      />
+                    </td>
+                    <td className="py-2 px-4">
+                      <input
+                        type="text"
+                        value={newRow.jobTitle}
+                        onChange={(e) => setNewRow({ ...newRow, jobTitle: e.target.value })}
+                        className="w-full p-1 border rounded"
+                        placeholder="Job Title"
+                      />
+                    </td>
+                    <td className="py-2 px-4">
+                      <input
+                        type="email"
+                        value={newRow.email}
+                        onChange={(e) => setNewRow({ ...newRow, email: e.target.value })}
+                        className="w-full p-1 border rounded"
+                        placeholder="Email"
+                      />
+                    </td>
+                    <td className="py-2 px-4">
+                      <input
+                        type="text"
+                        value={newRow.url}
+                        onChange={(e) => setNewRow({ ...newRow, url: e.target.value })}
+                        className="w-full p-1 border rounded"
+                        placeholder="URL"
+                      />
+                    </td>
+                    <td className="py-2 px-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleAddRow}
+                          className="p-1 text-green-600 hover:text-green-800"
+                        >
+                          <IconCheck size={20} stroke={1.5} />
+                        </button>
+                        <button
+                          onClick={() => setShowAddForm(false)}
+                          className="p-1 text-red-600 hover:text-red-800"
+                        >
+                          <IconX size={20} stroke={1.5} />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 )}
               </tbody>
             </table>
+            {!showAddForm && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                <IconPlus size={20} stroke={1.5} />
+                Add Row
+              </button>
+            )}
           </div>
         </>
       )}

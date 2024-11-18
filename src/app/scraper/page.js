@@ -42,8 +42,9 @@ export default function ScraperPage() {
         if (response.data.length) {
           const updatedData = response.data.map((item) => ({
             ...item,
-            url,
+            url, // Add the scraped URL to each item
           }));
+          // Append new scraped data to the existing data
           setData((prevData) => [...prevData, ...updatedData]);
         } else if (!response.data.length) {
           setShowModal(true);
@@ -51,6 +52,35 @@ export default function ScraperPage() {
           setError(response.data.message);
         }
       }
+      // const response = await axios.get(apiUrl + `/getStaffClassByDomain`, { params: { url: url } });
+
+      // const data = response.data;
+      // if (data.success && data.data) {
+      //   setShowModal(false);
+      //   try {
+      //     const response = await axios.post(apiUrl + '/scrape', { url },
+      //       {
+      //         headers: {
+      //           'Content-Type': 'application/json',
+      //         }
+      //       }
+      //     );
+      //     if (response.status === 200) {
+      //       const updatedData = response.data.map((item) => ({
+      //         ...item,
+      //         url, // Add the scraped URL to each item
+      //       }));
+      //       // Append new scraped data to the existing data
+      //       setData((prevData) => [...prevData, ...updatedData]);
+      //     } else {
+      //       setError(response.data.message);
+      //     }
+      //   } catch (err) {
+      //     setError('Failed to fetch data.');
+      //   }
+      // } else {
+      //   setShowModal(true);
+      // }
     } catch (error) {
       console.error('Error fetching domain data:', error);
     }

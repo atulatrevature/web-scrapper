@@ -130,7 +130,7 @@ export default function ScraperPage() {
       {/* Logo at the top */}
       <div className="flex justify-between">
         <img src="/oksgroups.jpg" alt="Logo" className="h-16" /> {/* Adjust the path and size */}
-        {/* <ClassConfigurationModal /> */}
+        <ClassConfigurationModal />
       </div>
 
       {/* URL input and Scrape button on the same row */}

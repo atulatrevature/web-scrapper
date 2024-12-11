@@ -19,6 +19,7 @@ export default function ScraperPage() {
   const [editForm, setEditForm] = useState({});
   const [showAddForm, setShowAddForm] = useState(false);
   const [paginationEnabled, setPaginationEnabled] = useState(false);
+  const [internalNavigationEnabled, setInternalNavigationEnabled] = useState(false);
   const [newRow, setNewRow] = useState({
     name: '',
     jobTitle: '',
@@ -38,7 +39,7 @@ export default function ScraperPage() {
     setShowModal(false);
 
     try {
-      const response = await axios.post(apiUrl + '/scrape', { url, paginationEnabled });
+      const response = await axios.post(apiUrl + '/scrape', { url, paginationEnabled, internalNavigationEnabled });
       if (response.status === 200) {
         if (response.data.length) {
           const updatedData = response.data.map((item) => ({
@@ -86,6 +87,8 @@ export default function ScraperPage() {
 
   // Function to clear the table data
   const handleClearData = () => {
+    setPaginationEnabled(false);
+    setInternalNavigationEnabled(false);
     setData([]);
     setSearchTerm('');
   };
@@ -167,6 +170,18 @@ export default function ScraperPage() {
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
           </div>
           <span className="ml-3 text-sm font-medium text-gray-700">Enable Pagination</span>
+        </label>
+        <label className="inline-flex items-center cursor-pointer">
+          <div className="relative">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={internalNavigationEnabled}
+              onChange={(e) => setInternalNavigationEnabled(e.target.checked)}
+            />
+            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+          </div>
+          <span className="ml-3 text-sm font-medium text-gray-700">Enable Internal Navigation</span>
         </label>
       </form>
 

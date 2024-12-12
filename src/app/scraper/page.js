@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx'; // Importing the xlsx library for Excel download
 import ClassConfigurationModal from '../components/classesConfig'
 import SelectorModal from '../components/selectorModal'
@@ -9,6 +10,9 @@ import { IconEdit, IconTrash, IconPlus, IconCheck, IconX } from '@tabler/icons-r
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ScraperPage() {
+  const searchParams = useSearchParams();
+
+  const [isAdmin, setIsAdmin] = useState(false);
   const [url, setUrl] = useState('');
   const [data, setData] = useState([]); // Initialize data as an empty array
   const [loading, setLoading] = useState(false);
@@ -26,6 +30,14 @@ export default function ScraperPage() {
     email: '',
     url: ''
   });
+
+  useEffect(() => {
+    const userType = searchParams?.get('userType') || '';
+
+    if (userType === 'oks-admin') {
+      setIsAdmin(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -133,7 +145,7 @@ export default function ScraperPage() {
       {/* Logo at the top */}
       <div className="flex justify-between">
         <img src="/oksgroups.jpg" alt="Logo" className="h-16" /> {/* Adjust the path and size */}
-        {/* <ClassConfigurationModal /> */}
+        {isAdmin && <ClassConfigurationModal />}
       </div>
 
       {/* URL input and Scrape button on the same row */}
@@ -384,7 +396,7 @@ export default function ScraperPage() {
           </div>
         </>
       )}
-      {showModal && <SelectorModal url={url} setIsOpen={setShowModal} isOpen={showModal} />}
+      {showModal && <SelectorModal url={url} setIsOpen={setShowModal} isOpen={showModal} isAdmin={isAdmin} />}
     </div>
   );
 }

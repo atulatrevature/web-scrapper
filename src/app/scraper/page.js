@@ -66,6 +66,7 @@ export default function ScraperPage() {
         }
       }
     } catch (error) {
+      alert("Error fetching data from url, Please verify the url and try again")
       console.error('Error fetching domain data:', error);
     }
 

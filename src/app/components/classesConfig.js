@@ -13,7 +13,7 @@ const ClassConfigurationModal = () => {
     useEffect(() => {
         const fetchClasses = async () => {
             try {
-                const response = await axios.get(apiUrl+'/potentialClasses', {
+                const response = await axios.get(apiUrl + '/potentialClasses', {
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -68,7 +68,10 @@ const ClassConfigurationModal = () => {
                         ...prevClasses,
                         [category]: {
                             ...prevClasses[category],
-                            [domainName]: className,
+                            [domainName]: {
+                                domain: domainName,
+                                selector: className
+                            },
                         },
                     }));
                 }
@@ -78,7 +81,7 @@ const ClassConfigurationModal = () => {
 
     const handleSave = async () => {
         try {
-            const response = await axios.post(apiUrl+'/potentialClasses', classes,
+            const response = await axios.post(apiUrl + '/potentialClasses', classes,
                 {
                     headers: {
                         'Content-Type': 'application/json',
@@ -110,19 +113,19 @@ const ClassConfigurationModal = () => {
             {isOpen && (
                 <div
                     id="default-modal"
-                    className="fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
+                    className="fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-gray-500/50"
                     aria-hidden="true"
                 >
-                    <div className="relative w-full max-w-2xl max-h-full bg-white rounded-lg shadow dark:bg-gray-700">
+                    <div className="relative w-full max-w-2xl max-h-full bg-white rounded-lg shadow">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                            <h3 className="text-xl font-semibold text-white">
+                        <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-200">
+                            <h3 className="text-xl font-semibold text-gray-900">
                                 Potential Classes Configuration
                             </h3>
                             <button
                                 onClick={() => setIsOpen(false)}
                                 type="button"
-                                className="text-gray-100 bg-transparent hover:bg-gray-200 hover:text-white rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                className="text-gray-600 bg-transparent hover:bg-gray-100 hover:text-gray-800 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
                             >
                                 <span className="sr-only">Close modal</span>
                                 &times;
@@ -133,20 +136,20 @@ const ClassConfigurationModal = () => {
                         <div className="p-4 md:p-5 space-y-4 max-h-[80vh] overflow-y-auto">
                             {Object.keys(classes).map((category) => (
                                 <div key={category} className="mb-4">
-                                    <h4 className="font-semibold text-lg text-white">{category.replace(/([A-Z])/g, ' $1')}</h4>
-                                    <table className="min-w-full text-left text-gray-100 dark:text-gray-100">
+                                    <h4 className="font-semibold text-lg text-gray-900">{category.replace(/([A-Z])/g, ' $1')}</h4>
+                                    <table className="min-w-full text-left text-gray-600">
                                         <thead>
-                                            <tr className='bg-gray-900'>
+                                            <tr className='bg-gray-100'>
                                                 {typeof classes[category] === 'object' && !Array.isArray(classes[category]) ? (
                                                     <>
-                                                        <th className="px-6 py-3">Domain</th>
-                                                        <th className="px-6 py-3">Class</th>
-                                                        <th className="px-6 py-3">Action</th>
+                                                        <th className="px-6 py-3 text-gray-800">Domain</th>
+                                                        <th className="px-6 py-3 text-gray-800">Class</th>
+                                                        <th className="px-6 py-3 text-gray-800">Action</th>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <th className="px-6 py-3">Class Name</th>
-                                                        <th className="px-6 py-3">Action</th>
+                                                        <th className="px-6 py-3 text-gray-800">Class Name</th>
+                                                        <th className="px-6 py-3 text-gray-800">Action</th>
                                                     </>
                                                 )}
                                             </tr>
@@ -154,13 +157,13 @@ const ClassConfigurationModal = () => {
                                         <tbody>
                                             {typeof classes[category] === 'object' && !Array.isArray(classes[category])
                                                 ? Object.entries(classes[category]).map(([domain, classValue], index) => (
-                                                    <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                                        <td className="px-6 py-4">{domain}</td>
-                                                        <td className="px-6 py-4">{classValue.selector}</td>
+                                                    <tr key={index} className="bg-gray-50 border-b border-gray-200">
+                                                        <td className="px-6 py-4 text-gray-700">{domain}</td>
+                                                        <td className="px-6 py-4 text-gray-700">{classValue.selector}</td>
                                                         <td className="px-6 py-4">
                                                             <button
                                                                 onClick={() => handleDelete(category, index)}
-                                                                className="text-red-600 hover:text-red-800"
+                                                                className="text-red-600 hover:text-red-700"
                                                             >
                                                                 <FaTrash />
                                                             </button>
@@ -168,12 +171,12 @@ const ClassConfigurationModal = () => {
                                                     </tr>
                                                 ))
                                                 : classes[category].map((classItem, index) => (
-                                                    <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                                        <td className="px-6 py-4">{classItem}</td>
+                                                    <tr key={index} className="bg-gray-50 border-b border-gray-200">
+                                                        <td className="px-6 py-4 text-gray-700">{classItem}</td>
                                                         <td className="px-6 py-4">
                                                             <button
                                                                 onClick={() => handleDelete(category, index)}
-                                                                className="text-red-600 hover:text-red-800"
+                                                                className="text-red-600 hover:text-red-700"
                                                             >
                                                                 <FaTrash />
                                                             </button>
@@ -195,10 +198,10 @@ const ClassConfigurationModal = () => {
                             ))}
                         </div>
                         {/* Modal Footer */}
-                        <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                        <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
                             <button
                                 onClick={handleSave}
-                                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                             >
                                 Save
                             </button>

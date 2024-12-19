@@ -109,7 +109,7 @@ const SelectorModal = ({ url, isOpen, setIsOpen, isAdmin }) => {
         isOpen && (
             <div
                 id="default-modal"
-                className="fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
+                className="fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-gray-500/50">
                 <div className="relative w-full max-w-3xl max-h-full bg-white rounded-lg shadow-lg">
                     {/* Modal Header */}
                     {isAdmin ? <>

@@ -5,8 +5,10 @@ import { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx'; // Importing the xlsx library for Excel download
 import ClassConfigurationModal from '../components/classesConfig'
 import SelectorModal from '../components/selectorModal'
+import Loader from '../components/loader'
 import axios from 'axios';
 import { IconEdit, IconTrash, IconPlus, IconCheck, IconX } from '@tabler/icons-react';
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ScraperPage() {
@@ -178,6 +180,7 @@ export default function ScraperPage() {
               type="checkbox"
               className="sr-only peer"
               checked={paginationEnabled}
+              disabled={loading}
               onChange={(e) => setPaginationEnabled(e.target.checked)}
             />
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
@@ -190,6 +193,7 @@ export default function ScraperPage() {
               type="checkbox"
               className="sr-only peer"
               checked={internalNavigationEnabled}
+              disabled={loading}
               onChange={(e) => setInternalNavigationEnabled(e.target.checked)}
             />
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
@@ -199,6 +203,8 @@ export default function ScraperPage() {
       </form>
 
       {error && <p className="text-red-500 text-center">{error}</p>}
+
+      {loading && <Loader isPaginationEnabled={paginationEnabled} isInternalNavigationEnabled={internalNavigationEnabled} />}
 
       {/* Search, Download, and Clear buttons on the same row */}
       {data.length > 0 && (

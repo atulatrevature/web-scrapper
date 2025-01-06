@@ -143,6 +143,32 @@ export default function ScraperPage() {
     setShowAddForm(false);
   };
 
+  const copyTableAsCSV = () => {
+    const table = document.querySelector('#data-table');
+    const headers = Array.from(table.querySelectorAll('thead th'))
+      .slice(1, -1)
+      .map(header => header.textContent.trim())
+      .join('\t');
+
+    const rows = Array.from(table.querySelectorAll('tbody tr'))
+      .map(row => {
+        return Array.from(row.querySelectorAll('td'))
+          .slice(1, -1)
+          .map(cell => cell.textContent.trim())
+          .join('\t'); 
+      })
+      .join('\n');
+    const tableData = `${headers}\n${rows}`;
+    navigator.clipboard.writeText(tableData)
+      .then(() => {
+        alert('Table copied to clipboard!');
+      })
+      .catch((error) => {
+        console.error('Failed to copy table:', error);
+        alert('Failed to copy table. Please try again.');
+      });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 py-5 px-10">
       {/* Logo at the top */}
@@ -219,6 +245,12 @@ export default function ScraperPage() {
           />
           <div className="flex items-center space-x-2">
             <button
+              onClick={copyTableAsCSV}
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+            >
+              Copy Table
+            </button>
+            <button
               onClick={handleDownloadExcel}
               className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
             >
@@ -244,7 +276,7 @@ export default function ScraperPage() {
 
           {/* Display the scraped data in a table */}
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white rounded shadow">
+            <table id="data-table" className="min-w-full bg-white rounded shadow">
               <thead>
                 <tr className="bg-gray-800 text-white">
                   <th className="py-2 px-4 text-left">S.No</th>

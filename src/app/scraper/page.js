@@ -155,18 +155,45 @@ export default function ScraperPage() {
         return Array.from(row.querySelectorAll('td'))
           .slice(1, -1)
           .map(cell => cell.textContent.trim())
-          .join('\t'); 
+          .join('\t');
       })
       .join('\n');
     const tableData = `${headers}\n${rows}`;
-    navigator.clipboard.writeText(tableData)
-      .then(() => {
+    // navigator.clipboard.writeText(tableData)
+    //   .then(() => {
+    //     alert('Table copied to clipboard!');
+    //   })
+    //   .catch((error) => {
+    //     console.error('Failed to copy table:', error);
+    //     alert('Failed to copy table. Please try again.');
+    //   });
+
+    const textarea = document.createElement('textarea');
+    textarea.value = tableData;
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
         alert('Table copied to clipboard!');
-      })
-      .catch((error) => {
-        console.error('Failed to copy table:', error);
-        alert('Failed to copy table. Please try again.');
-      });
+      } else if (window.clipboardData) {
+        try {
+          window.clipboardData.setData('Text', tableData);
+          alert('Table copied to clipboard!');
+        } catch (error) {
+          console.error('Failed to copy table:', error);
+          alert('Failed to copy table. Please try again.');
+        }
+      } else {
+        throw new Error('Copy command failed.');
+      }
+    } catch (error) {
+      console.error('Failed to copy table:', error);
+      alert('Failed to copy table. Please try again.');
+    } finally {
+      document.body.removeChild(textarea);
+    }
   };
 
   return (

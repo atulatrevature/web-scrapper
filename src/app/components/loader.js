@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 
 const Loader = ({ isPaginationEnabled, isInternalNavigationEnabled }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [elapsedTime, setElapsedTime] = useState(0);
+    const [progress, setProgress] = useState(0);
 
     const quickLoadMessages = [
         // Starting texts
@@ -11,7 +13,7 @@ const Loader = ({ isPaginationEnabled, isInternalNavigationEnabled }) => {
         // Quick load-specific texts
         "Loading the data...",
         "Analyzing page structure...",
-        "We’re almost done...",
+        "We're almost done...",
         // Ending texts
         "Thanks for waiting...",
         "We are almost finished...",
@@ -146,13 +148,26 @@ const Loader = ({ isPaginationEnabled, isInternalNavigationEnabled }) => {
     const messages = getMessages();
 
     useEffect(() => {
+        // Start timer
+        const startTime = Date.now();
+        
+        // Update elapsed time every second
+        const timerInterval = setInterval(() => {
+            const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+            setElapsedTime(timeElapsed);
+        }, 1000);
+        
         const setRandomInterval = () => {
             const randomDelay = Math.floor(Math.random() * (8000 - 3000 + 1)) + 3000;
             return setInterval(() => {
                 setCurrentIndex(current => {
                     if (current < messages.length - 1) {
+                        // Update progress percentage based on current message index
+                        const newProgress = Math.min(95, Math.floor((current + 1) / messages.length * 100));
+                        setProgress(newProgress);
                         return current + 1;
                     }
+                    setProgress(100); // Set to 100% when finished
                     return current;
                 });
             }, randomDelay);
@@ -162,54 +177,75 @@ const Loader = ({ isPaginationEnabled, isInternalNavigationEnabled }) => {
     
         return () => {
             clearInterval(interval);
+            clearInterval(timerInterval);
             interval = null;
         };
-    }, [messages.length]);    
+    }, [messages.length]);
+    
+    // Format elapsed time as mm:ss
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
 
     return (
-        <div className="flex flex-col items-center justify-center p-8 space-y-4">
-            {/* Animated dots */}
-            <div className="flex space-x-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '400ms' }}></div>
+        <div className="flex flex-col items-center justify-center p-8 space-y-6 max-w-2xl mx-auto">
+            {/* Timer display */}
+            <div className="text-lg font-mono bg-gray-800 text-green-400 px-4 py-2 rounded-lg shadow-lg">
+                Elapsed Time: {formatTime(elapsedTime)}
             </div>
-
-            {/* <div className="relative w-48 h-64 bg-gray-100 rounded-lg shadow-lg overflow-hidden">
-                <div className="absolute top-4 left-4 right-4 space-y-2">
-                    <div className="h-2 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-2 bg-gray-200 rounded w-full"></div>
-                    <div className="h-2 bg-gray-200 rounded w-5/6"></div>
-                    <div className="h-2 bg-gray-200 rounded w-4/5"></div>
-                    <div className="h-2 bg-gray-200 rounded w-full"></div>
-                    <div className="h-2 bg-gray-200 rounded w-3/4"></div>
+            
+            {/* Progress bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
+                <div 
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                ></div>
+            </div>
+            
+            {/* Futuristic console display */}
+            <div className="w-full bg-gray-900 border border-gray-700 rounded-lg p-6 shadow-lg text-left font-mono relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-purple-500"></div>
+                
+                {/* Console header */}
+                <div className="flex justify-between items-center mb-4 text-gray-400 text-sm border-b border-gray-700 pb-2">
+                    <div>Web Scraper v1.0</div>
+                    <div>Status: <span className="text-green-400">Active</span></div>
                 </div>
-                <div className="absolute top-0 left-0 right-0 h-1 bg-blue-400 opacity-75 animate-scan">
-                    <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-blue-400/50 to-transparent"></div>
+                
+                {/* Current operation display */}
+                <div className="text-green-400 mb-4">
+                    <span className="text-blue-400">&gt;</span> {messages[currentIndex]}
+                    <span className="inline-block w-2 h-4 ml-1 bg-green-400 animate-pulse"></span>
                 </div>
-            </div> */}
-            {/* Loading message */}
-            <div className="text-lg text-gray-700 min-h-[28px] text-center transition-all duration-300 ease-in-out">
-                {messages[currentIndex]}
+                
+                {/* Previous operations (show last 3 messages) */}
+                <div className="text-gray-500 text-sm space-y-1">
+                    {Array.from({length: 3}).map((_, i) => {
+                        const msgIndex = currentIndex - (i + 1);
+                        if (msgIndex >= 0) {
+                            return (
+                                <div key={i} className="opacity-70" style={{opacity: 0.7 - (i * 0.2)}}>
+                                    <span className="text-blue-400">&gt;</span> {messages[msgIndex]}
+                                </div>
+                            );
+                        }
+                        return null;
+                    })}
+                </div>
+            </div>
+            
+            {/* Animated processing indicator */}
+            <div className="flex space-x-3 items-center">
+                <div className="relative w-10 h-10">
+                    <div className="absolute inset-0 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+                    <div className="absolute inset-1 border-4 border-t-transparent border-r-blue-400 border-b-transparent border-l-transparent rounded-full animate-spin" style={{animationDuration: '1.5s'}}></div>
+                </div>
+                <div className="text-sm text-gray-500">Processing data...</div>
             </div>
         </div>
     );
 };
-
-// const style = document.createElement('style');
-// style.textContent = `
-//   @keyframes scan {
-//     0% {
-//       transform: translateY(0);
-//     }
-//     90%, 100% {
-//       transform: translateY(256px);
-//     }
-//   }
-//   .animate-scan {
-//     animation: scan 2s ease-in-out infinite;
-//   }
-// `;
-// document.head.appendChild(style);
 
 export default Loader;

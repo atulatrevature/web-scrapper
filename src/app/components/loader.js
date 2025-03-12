@@ -150,6 +150,7 @@ const Loader = ({ isPaginationEnabled, isInternalNavigationEnabled }) => {
     useEffect(() => {
         // Start timer
         const startTime = Date.now();
+        const targetDuration = 420000; // 7 minutes in milliseconds
         
         // Update elapsed time every second
         const timerInterval = setInterval(() => {
@@ -162,17 +163,21 @@ const Loader = ({ isPaginationEnabled, isInternalNavigationEnabled }) => {
             return setInterval(() => {
                 setCurrentIndex(current => {
                     if (current < messages.length - 1) {
-                        // Update progress percentage based on current message index
-                        const newProgress = Math.min(95, Math.floor((current + 1) / messages.length * 100));
+                        // Calculate progress based on elapsed time instead of message index
+                        const elapsedMs = Date.now() - startTime;
+                        const newProgress = Math.min(95, Math.floor((elapsedMs / targetDuration) * 100));
                         setProgress(newProgress);
                         return current + 1;
                     }
-                    setProgress(100); // Set to 100% when finished
+                    // Only set to 100% after target duration
+                    if (Date.now() - startTime >= targetDuration) {
+                        setProgress(100);
+                    }
                     return current;
                 });
             }, randomDelay);
         };
-    
+
         let interval = setRandomInterval();
     
         return () => {

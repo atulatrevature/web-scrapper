@@ -192,17 +192,17 @@ const Loader = ({ isPaginationEnabled, isInternalNavigationEnabled }) => {
     return (
         <div className="flex flex-col items-center justify-center p-8 space-y-6 max-w-2xl mx-auto">
             {/* Timer display */}
-            {/* <div className="text-lg font-mono bg-gray-800 text-green-400 px-4 py-2 rounded-lg shadow-lg">
+            <div className="text-lg font-mono bg-gray-800 text-green-400 px-4 py-2 rounded-lg shadow-lg">
                 Elapsed Time: {formatTime(elapsedTime)}
-            </div> */}
+            </div>
             
             {/* Progress bar */}
-            {/* <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
                 <div 
                     className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${progress}%` }}
                 ></div>
-            </div> */}
+            </div>
             
             {/* Futuristic console display */}
             <div className="w-full bg-gray-900 border border-gray-700 rounded-lg p-6 shadow-lg text-left font-mono relative overflow-hidden">

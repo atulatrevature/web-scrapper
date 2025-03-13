@@ -150,7 +150,7 @@ const Loader = ({ isPaginationEnabled, isInternalNavigationEnabled }) => {
     useEffect(() => {
         // Start timer
         const startTime = Date.now();
-        const targetDuration = 420000; // 7 minutes in milliseconds
+        const targetDuration = 32000; // 5+ minutes in milliseconds
         
         // Update elapsed time every second
         const timerInterval = setInterval(() => {

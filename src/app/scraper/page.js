@@ -237,9 +237,7 @@ export default function ScraperPage() {
             </span>
           )}
         </button>
-      </form>
 
-      <div className="flex space-x-6 mb-6">
         <label className="inline-flex items-center cursor-pointer bg-gray-800 p-2 rounded-lg border border-gray-700">
           <div className="relative">
             <input
@@ -253,7 +251,7 @@ export default function ScraperPage() {
           </div>
           <span className="ml-3 text-sm font-medium text-gray-300">Enable Pagination</span>
         </label>
-        
+
         <label className="inline-flex items-center cursor-pointer bg-gray-800 p-2 rounded-lg border border-gray-700">
           <div className="relative">
             <input
@@ -265,9 +263,10 @@ export default function ScraperPage() {
             />
             <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-gray-300 after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
           </div>
-          <span className="ml-3 text-sm font-medium text-gray-300">Enable Internal Navigation</span>
+          <span className="ml-3 text-sm font-medium text-gray-300 no-wrap">Enable Internal Navigation</span>
         </label>
-      </div>
+      </form>
+
 
       {error && <p className="text-red-400 text-center p-3 bg-red-900/30 border border-red-700 rounded-lg my-4">{error}</p>}
 
@@ -482,7 +481,7 @@ export default function ScraperPage() {
             {!showAddForm && (
               <button
                 onClick={() => setShowAddForm(true)}
-                className="mt-6 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg"
+                className="m-3 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg"
               >
                 <IconPlus size={20} stroke={1.5} />
                 Add Row

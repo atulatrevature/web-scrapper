@@ -140,7 +140,7 @@ const SelectorModal = ({ url, isOpen, setIsOpen, isAdmin }) => {
                                             Selector: {selector}
                                         </div>
                                         <div
-                                            className="mt-2 p-2"
+                                            className="mt-2 p-2 text-black"
                                             dangerouslySetInnerHTML={{ __html: snippet }}
                                         />
                                     </div>

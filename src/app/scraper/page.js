@@ -30,7 +30,8 @@ export default function ScraperPage() {
     name: '',
     jobTitle: '',
     email: '',
-    url: ''
+    url: '',
+    phone: ''
   });
 
   useEffect(() => {
@@ -82,12 +83,13 @@ export default function ScraperPage() {
       return;
     }
 
-    const headers = ['Name', 'Job Title', 'Email Address', 'Scraped URL'];
+    const headers = ['Name', 'Job Title', 'Email Address', 'Phone Number', 'Scraped URL'];
 
     const tableData = data.map(item => ({
       name: item.name,
       jobTitle: item.jobTitle,
       email: item.email,
+      phone: item.phone || '',
       url: item.url, // Include the URL in the Excel data
     }));
 
@@ -113,7 +115,8 @@ export default function ScraperPage() {
     item['originalIndex'] = index;
     return item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      item.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.phone?.toLowerCase().includes(searchTerm.toLowerCase())
   }
   );
 
@@ -139,7 +142,7 @@ export default function ScraperPage() {
 
   const handleAddRow = () => {
     setData([...data, newRow]);
-    setNewRow({ name: '', jobTitle: '', email: '', url: '' });
+    setNewRow({ name: '', jobTitle: '', email: '', url: '', phone: '' });
     setShowAddForm(false);
   };
 
@@ -337,6 +340,7 @@ export default function ScraperPage() {
                   <th className="py-3 px-4 text-left">Name</th>
                   <th className="py-3 px-4 text-left">Job Title</th>
                   <th className="py-3 px-4 text-left">Email Address</th>
+                  <th className="py-3 px-4 text-left">Phone Number</th>
                   <th className="py-3 px-4 text-left">Scraped URL</th>
                   <th className="py-3 px-4 text-left">Actions</th>
                 </tr>
@@ -381,6 +385,18 @@ export default function ScraperPage() {
                         />
                       ) : (
                         <span className="text-blue-400">{item.email}</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      {editingIndex === item.originalIndex ? (
+                        <input
+                          type="text"
+                          value={editForm.phone || ''}
+                          onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                          className="w-full p-2 border border-gray-600 bg-gray-900 rounded-lg text-gray-100"
+                        />
+                      ) : (
+                        <span>{item.phone}</span>
                       )}
                     </td>
                     <td className="py-3 px-4 text-green-400 truncate max-w-xs">{item.url}</td>
@@ -447,6 +463,15 @@ export default function ScraperPage() {
                         onChange={(e) => setNewRow({ ...newRow, email: e.target.value })}
                         className="w-full p-2 border border-gray-600 bg-gray-900 rounded-lg text-gray-100"
                         placeholder="Email"
+                      />
+                    </td>
+                    <td className="py-3 px-4">
+                      <input
+                        type="text"
+                        value={newRow.phone}
+                        onChange={(e) => setNewRow({ ...newRow, phone: e.target.value })}
+                        className="w-full p-2 border border-gray-600 bg-gray-900 rounded-lg text-gray-100"
+                        placeholder="Phone"
                       />
                     </td>
                     <td className="py-3 px-4">

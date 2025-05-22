@@ -82,17 +82,18 @@ export default function ScraperPage() {
       return;
     }
 
-    const headers = ['Name', 'Job Title', 'Email Address', 'Scraped URL'];
+    const headers = ['S.No', 'Name', 'Job Title', 'Email Address', 'Scraped URL'];
 
-    const tableData = data.map(item => ({
-      name: item.name,
-      jobTitle: item.jobTitle,
-      email: item.email,
-      url: item.url, // Include the URL in the Excel data
+    const tableData = data.map((item, index) => ({
+      'S.No': index + 1,
+      'Name': item.name || '',
+      'Job Title': item.jobTitle || '',
+      'Email Address': item.email || '',
+      'Scraped URL': item.url || '', 
     }));
 
     // Create a worksheet from the table data
-    const worksheet = XLSX.utils.json_to_sheet(tableData, { header: headers });
+    const worksheet = XLSX.utils.json_to_sheet(tableData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Staff Data');
 
